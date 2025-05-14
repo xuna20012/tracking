@@ -3,6 +3,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import prisma from "@/lib/prisma";
 
+// Define custom types for NextAuth
+interface CustomUser {
+  id: string;
+  email: string;
+  name?: string;
+  role?: string;
+}
+
 const handler = NextAuth({
   providers: [
     CredentialsProvider({
@@ -50,8 +58,10 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
-        token.id = user.id;
+        // Use type assertion to tell TypeScript about our custom properties
+        const customUser = user as CustomUser;
+        token.role = customUser.role;
+        token.id = customUser.id;
       }
       return token;
     },
