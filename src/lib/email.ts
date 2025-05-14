@@ -6,8 +6,8 @@ export const transporter = nodemailer.createTransport({
   port: 465,
   secure: true, // true pour SSL
   auth: {
-    user: process.env.SMTP_USER || 'noreply@ohpieces.com',
-    pass: process.env.SMTP_PASSWORD || 'P@sser1234',
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASSWORD || '',
   },
   tls: {
     rejectUnauthorized: false, // Ne pas échouer sur les certificats invalides

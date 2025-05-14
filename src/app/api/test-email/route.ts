@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     }
     
     // Utiliser la même adresse que celle configurée dans le transporteur
-    const smtpUser = process.env.SMTP_USER || 'noreply@ohpieces.com';
+    const smtpUser = process.env.SMTP_USER || '';
     
     // Envoyer un email de test
     const result = await transporter.sendMail({
@@ -33,10 +33,10 @@ export async function GET(req: NextRequest) {
             <p>Si vous recevez cet email, cela signifie que la configuration SMTP de votre application est correcte.</p>
             <p>Paramètres utilisés :</p>
             <ul>
-              <li>Hôte SMTP : mail84.lwspanel.com</li>
-              <li>Port : 465</li>
-              <li>Sécurisé : true (SSL)</li>
-              <li>Utilisateur : ${smtpUser}</li>
+              <li>Hôte SMTP : ${process.env.SMTP_HOST}</li>
+              <li>Port : ${process.env.SMTP_PORT}</li>
+              <li>Sécurisé : ${process.env.SMTP_SECURE}</li>
+              <li>Utilisateur : ${process.env.SMTP_USER}</li>
             </ul>
           </div>
           
