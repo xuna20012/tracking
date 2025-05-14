@@ -99,10 +99,7 @@ export default function LoginPage() {
         
         <div className="mt-6 text-center text-sm text-gray-500">
           <p>
-            Pas encore de compte?{' '}
-            <Link href="/register" className="text-blue-600 hover:underline">
-              S'inscrire
-            </Link>
+            Pour obtenir un compte, veuillez contacter l'administrateur.
           </p>
         </div>
       </div>

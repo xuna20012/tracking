@@ -87,13 +87,6 @@ export default function Navbar() {
               >
                 Connexion
               </Link>
-              <Link 
-                href="/register" 
-                className="hover:opacity-80 transition-opacity"
-                style={{ color: 'white' }}
-              >
-                Inscription
-              </Link>
             </>
           )}
         </div>
@@ -182,14 +175,6 @@ export default function Navbar() {
                       onClick={toggleMenu}
                     >
                       Connexion
-                    </Link>
-                    <Link 
-                      href="/register" 
-                      className="hover:opacity-80 transition-opacity"
-                      style={{ color: 'white' }}
-                      onClick={toggleMenu}
-                    >
-                      Inscription
                     </Link>
                   </>
                 )}
