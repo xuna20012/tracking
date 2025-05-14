@@ -3,42 +3,10 @@ import { getServerSession } from "next-auth/next";
 import { hash } from "bcryptjs";
 import prisma from "@/lib/prisma";
 
-// Corriger la signature de la fonction GET
+// Récupérer un utilisateur spécifique
 export async function GET(
-  request: NextRequest,
-  context: { params: { id: string } }
-) {
-  try {
-    const id = context.params.id;
-    
-    // Vérifier si l'ID est valide
-    if (!id) {
-      return NextResponse.json({ error: 'ID utilisateur requis' }, { status: 400 });
-    }
-    
-    // Récupérer l'utilisateur par ID
-    const user = await prisma.user.findUnique({
-      where: { id: parseInt(id) }
-    });
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Utilisateur non trouvé' }, { status: 404 });
-    }
-    
-    // Ne pas renvoyer le mot de passe
-    const { password, ...userWithoutPassword } = user;
-    
-    return NextResponse.json(userWithoutPassword);
-  } catch (error) {
-    console.error('Erreur lors de la récupération de l\'utilisateur:', error);
-    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
-  }
-}
-
-// Mettre à jour un utilisateur
-export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession();
@@ -51,7 +19,56 @@ export async function PUT(
       );
     }
 
-    const id = parseInt(context.params.id);
+    const id = parseInt(params.id);
+    
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        nom: true,
+        prenom: true,
+        role: true,
+        dateCreation: true,
+        derniereConnexion: true,
+        actif: true
+      }
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Utilisateur non trouvé" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(user, { status: 200 });
+  } catch (error) {
+    console.error("Erreur lors de la récupération de l'utilisateur:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la récupération de l'utilisateur" },
+      { status: 500 }
+    );
+  }
+}
+
+// Mettre à jour un utilisateur
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession();
+    
+    // Vérifier si l'utilisateur est connecté et est un administrateur
+    if (!session?.user || (session.user as any).role !== "admin") {
+      return NextResponse.json(
+        { error: "Non autorisé" },
+        { status: 403 }
+      );
+    }
+
+    const id = parseInt(params.id);
     const { email, password, nom, prenom, role, actif } = await req.json();
 
     // Vérifier si l'utilisateur existe
@@ -109,7 +126,7 @@ export async function PUT(
 // Supprimer un utilisateur
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession();
@@ -122,7 +139,7 @@ export async function DELETE(
       );
     }
 
-    const id = parseInt(context.params.id);
+    const id = parseInt(params.id);
 
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findUnique({

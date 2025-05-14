@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { transporter } from '@/lib/email';
+import nodemailer from 'nodemailer';
 
 export async function GET(req: NextRequest) {
   try {
@@ -13,24 +13,48 @@ export async function GET(req: NextRequest) {
       }, { status: 400 });
     }
     
-    // Utiliser la même adresse que celle configurée dans le transporteur
+    // Récupérer l'adresse email utilisée pour l'authentification
     const smtpUser = process.env.SMTP_USER || 'noreply@ohpieces.com';
     
+    // Créer un transporteur avec les paramètres spécifiques à LWS
+    const smtpTransporter = nodemailer.createTransport({
+      host: 'mail84.lwspanel.com', // Utiliser le serveur SMTP direct de LWS
+      port: 465,
+      secure: true, // true pour SSL
+      auth: {
+        user: smtpUser,
+        pass: process.env.SMTP_PASSWORD || 'P@sser1234',
+      },
+      debug: true,
+      logger: true,
+      tls: {
+        rejectUnauthorized: false,
+      }
+    });
+    
+    // Afficher les informations de configuration
+    console.log('Configuration SMTP LWS direct:', {
+      host: 'mail84.lwspanel.com',
+      port: 465,
+      secure: true,
+      user: smtpUser
+    });
+    
     // Envoyer un email de test
-    const result = await transporter.sendMail({
+    const result = await smtpTransporter.sendMail({
       from: `"Oh Pieces Logistique" <${smtpUser}>`,
       to: email,
-      subject: 'Test de configuration SMTP',
+      subject: 'Test de configuration SMTP (LWS Direct - SSL)',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
           <div style="text-align: center; margin-bottom: 20px;">
             <h1 style="color: #254e9d; margin-bottom: 5px;">Oh Pieces Logistique</h1>
-            <p style="color: #666; font-size: 14px;">Test de configuration SMTP</p>
+            <p style="color: #666; font-size: 14px;">Test de configuration SMTP (LWS Direct - SSL)</p>
           </div>
           
           <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
             <h4 style="color: #333; margin-top: 0;">Configuration réussie !</h4>
-            <p>Si vous recevez cet email, cela signifie que la configuration SMTP de votre application est correcte.</p>
+            <p>Si vous recevez cet email, cela signifie que la configuration SMTP directe avec LWS est correcte.</p>
             <p>Paramètres utilisés :</p>
             <ul>
               <li>Hôte SMTP : mail84.lwspanel.com</li>
@@ -59,16 +83,16 @@ export async function GET(req: NextRequest) {
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Email de test envoyé avec succès',
+      message: 'Email de test envoyé avec succès (LWS direct - SSL)',
       details: result
     });
     
   } catch (error) {
-    console.error('Erreur lors de l\'envoi de l\'email de test:', error);
+    console.error('Erreur lors de l\'envoi de l\'email de test (LWS direct - SSL):', error);
     
     return NextResponse.json({ 
       success: false, 
-      error: 'Échec de l\'envoi de l\'email de test',
+      error: 'Échec de l\'envoi de l\'email de test (LWS direct - SSL)',
       details: error instanceof Error ? error.message : 'Erreur inconnue'
     }, { status: 500 });
   }
