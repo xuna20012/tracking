@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { numero: string } }
-) {
+export async function GET(req: NextRequest) {
   try {
-    const numero = params.numero;
+    // Extraire le numéro de l'URL
+    const pathname = req.nextUrl.pathname;
+    const numeroMatch = pathname.match(/\/api\/track\/([^\/]+)/);
+    if (!numeroMatch) {
+      return NextResponse.json(
+        { error: "Numéro de commande non valide" },
+        { status: 400 }
+      );
+    }
+    
+    const numero = numeroMatch[1];
     
     // Utiliser une requête SQL brute pour éviter les problèmes avec les dates invalides
     const colis = await prisma.$queryRawUnsafe(`
