@@ -6,7 +6,7 @@ import prisma from "@/lib/prisma";
 // Récupérer un utilisateur spécifique
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession();
@@ -19,7 +19,7 @@ export async function GET(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id);
     
     const user = await prisma.user.findUnique({
       where: { id },
@@ -55,7 +55,7 @@ export async function GET(
 // Mettre à jour un utilisateur
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession();
@@ -68,7 +68,7 @@ export async function PUT(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id);
     const { email, password, nom, prenom, role, actif } = await req.json();
 
     // Vérifier si l'utilisateur existe
@@ -126,7 +126,7 @@ export async function PUT(
 // Supprimer un utilisateur
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession();
@@ -139,7 +139,7 @@ export async function DELETE(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id);
 
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findUnique({
