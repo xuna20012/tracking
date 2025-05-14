@@ -15,12 +15,19 @@ const formatDateSafely = (date: any) => {
 };
 
 // GET a specific package by ID
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest) {
   try {
-    const id = parseInt(params.id);
+    // Extraire l'ID de l'URL
+    const pathname = req.nextUrl.pathname;
+    const idMatch = pathname.match(/\/api\/colis\/(\d+)/);
+    if (!idMatch) {
+      return NextResponse.json(
+        { error: "ID colis non valide" },
+        { status: 400 }
+      );
+    }
+    
+    const id = parseInt(idMatch[1]);
     
     // Utiliser une requête SQL qui évite les problèmes de dates
     const result = await prisma.$queryRawUnsafe(`
@@ -82,12 +89,19 @@ export async function GET(
 }
 
 // PUT update a package
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest) {
   try {
-    const id = parseInt(params.id);
+    // Extraire l'ID de l'URL
+    const pathname = req.nextUrl.pathname;
+    const idMatch = pathname.match(/\/api\/colis\/(\d+)/);
+    if (!idMatch) {
+      return NextResponse.json(
+        { error: "ID colis non valide" },
+        { status: 400 }
+      );
+    }
+    
+    const id = parseInt(idMatch[1]);
     const data = await req.json();
     
     // Récupérer l'état actuel du colis pour comparer les changements de statut
@@ -277,12 +291,19 @@ export async function PUT(
 }
 
 // DELETE a package
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest) {
   try {
-    const id = parseInt(params.id);
+    // Extraire l'ID de l'URL
+    const pathname = req.nextUrl.pathname;
+    const idMatch = pathname.match(/\/api\/colis\/(\d+)/);
+    if (!idMatch) {
+      return NextResponse.json(
+        { error: "ID colis non valide" },
+        { status: 400 }
+      );
+    }
+    
+    const id = parseInt(idMatch[1]);
     
     // Utiliser SQL brut pour la suppression
     await prisma.$executeRawUnsafe(`
