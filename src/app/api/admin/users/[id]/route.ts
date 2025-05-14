@@ -3,13 +3,13 @@ import { getServerSession } from "next-auth/next";
 import { hash } from "bcryptjs";
 import prisma from "@/lib/prisma";
 
-// Fonction GET avec la bonne signature
+// Corriger la signature de la fonction GET
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
+    const id = context.params.id;
     
     // Vérifier si l'ID est valide
     if (!id) {
@@ -38,7 +38,7 @@ export async function GET(
 // Mettre à jour un utilisateur
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession();
@@ -51,7 +51,7 @@ export async function PUT(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id);
     const { email, password, nom, prenom, role, actif } = await req.json();
 
     // Vérifier si l'utilisateur existe
@@ -109,7 +109,7 @@ export async function PUT(
 // Supprimer un utilisateur
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession();
@@ -122,7 +122,7 @@ export async function DELETE(
       );
     }
 
-    const id = parseInt(params.id);
+    const id = parseInt(context.params.id);
 
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findUnique({
