@@ -1,8 +1,18 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+  --color-primary: #254e9d;
+  --color-primary-light: #3a64b3;
+  --color-primary-dark: #1c3c7a;
+  --color-secondary: #fd7e14;
+  --color-secondary-light: #fe9442;
+  --color-secondary-dark: #e06a08;
+  --navbar-height: 49px;
 }
 
 @theme inline {
@@ -12,15 +22,78 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  color: rgb(var(--foreground-rgb));
+  background-color: #ffffff;
   font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+}
+
+#__next {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Styles pour les graphiques */
+canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Classes de couleurs personnalisées */
+.bg-brand-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-brand-secondary {
+  background-color: var(--color-secondary);
+}
+
+.text-brand-primary {
+  color: var(--color-primary);
+}
+
+.text-brand-secondary {
+  color: var(--color-secondary);
+}
+
+/* Améliorations pour les formulaires */
+input, textarea, select {
+  color: #111827 !important; /* force text-gray-900 */
+  background-color: white !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #9CA3AF !important; /* text-gray-400 */
+}
+
+input[type="date"] {
+  color-scheme: light;
+}
+
+/* Assurer la visibilité du texte */
+.text-gray-500, .text-gray-600, .text-gray-700 {
+  color: #4b5563 !important; /* Assurer une couleur de texte suffisamment foncée */
+}
+
+.text-white {
+  color: #ffffff !important;
+}
+
+/* Assurer que le fond n'est pas noir */
+.bg-gray-50 {
+  background-color: #f9fafb !important;
+}
+
+.bg-white {
+  background-color: #ffffff !important;
 }

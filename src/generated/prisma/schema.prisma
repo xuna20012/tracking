@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Colis {
+  id                                 Int       @id @default(autoincrement())
+  colis_nom                          String    @db.Text
+  description                        String    @db.Text
+  date_commande                      DateTime  @db.Date
+  date_reception                     DateTime  @db.Date
+  numero_commande                    String    @db.VarChar(20)
+  statut_ordered                     Boolean   @default(false)
+  statut_in_transit                  Boolean   @default(false)
+  statut_out_of_delivery             Boolean   @default(false)
+  statut_delivered                   Boolean   @default(false)
+  estimation_livraison               DateTime  @db.Date
+  proprietaire_nom                   String    @db.VarChar(255)
+  proprietaire_email                 String    @db.VarChar(255)
+  proprietaire_telephone             String    @db.VarChar(20)
+  statut_validated                   Boolean   @default(false)
+  statut_preparing                   Boolean   @default(false)
+  statut_departure                   Boolean   @default(false)
+  statut_attente_douane              Boolean   @default(false)
+  description_validated              String    @db.Text
+  description_preparing              String    @db.Text
+  description_departure              String    @db.Text
+  description_attente_douane         String    @db.Text
+  description_delivered              String    @db.Text
+  date_ajout                         DateTime
+  statut_en_cours_de_reparation      Boolean   @default(false)
+  statut_reparation_terminee         Boolean   @default(false)
+  prise_rendez_vous_active           Boolean   @default(false)
+  description_en_cours_de_reparation String    @db.Text
+  description_reparation_terminee    String    @db.Text
+  rendez_vous_date                   DateTime? @db.Date
+  rendez_vous_statut                 String?   @db.VarChar(255)
+  details_supplementaires_visible    Boolean   @default(false)
+  details_supplementaires            String?   @db.LongText
+  etapes_suivi                       String?   @db.Text
+
+  @@map("tracking_colis")
+}
