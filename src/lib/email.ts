@@ -6,8 +6,8 @@ export const transporter = nodemailer.createTransport({
   port: 465,
   secure: true, // true pour SSL
   auth: {
-    user: process.env.SMTP_USER || 'noreply@ohpieces.com',
-    pass: process.env.SMTP_PASSWORD || 'P@sser1234',
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASSWORD || '',
   },
   tls: {
     rejectUnauthorized: false, // Ne pas échouer sur les certificats invalides
@@ -57,7 +57,7 @@ export async function sendNewPackageEmail(colisData: ColisEmailData): Promise<bo
           <div style="margin-bottom: 20px;">
             <p>Vous pouvez suivre votre colis à tout moment en cliquant sur le bouton ci-dessous :</p>
             <div style="text-align: center;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ohpieces.com'}/track/${numeroCommande}" style="display: inline-block; background-color: #254e9d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Suivre mon colis</a>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://logistique.ohgarage.com'}/track/${numeroCommande}" style="display: inline-block; background-color: #254e9d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Suivre mon colis</a>
             </div>
           </div>
           
@@ -67,7 +67,7 @@ export async function sendNewPackageEmail(colisData: ColisEmailData): Promise<bo
           </div>
           
           <div style="margin-top: 20px; text-align: center; border-top: 1px solid #e0e0e0; padding-top: 20px;">
-            <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://ohpieces.com'}/images/ohpieces.png" alt="Oh Pieces Logistique" style="max-width: 150px; height: auto; margin-bottom: 10px;">
+            <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://logistique.ohgarage.com'}/images/ohpieces.png" alt="Oh Pieces Logistique" style="max-width: 150px; height: auto; margin-bottom: 10px;">
             <div style="font-size: 12px; color: #666;">
               <p style="margin: 5px 0;"><a href="mailto:contact@ohpieces.com" style="color: #254e9d; text-decoration: none;">contact@ohpieces.com</a></p>
               <p style="margin: 5px 0;"><a href="tel:+221768669898" style="color: #254e9d; text-decoration: none;">+221 76 866 98 98</a></p>
@@ -153,7 +153,7 @@ export async function sendStatusUpdateEmail(colisData: ColisEmailData): Promise<
           <div style="margin-bottom: 20px;">
             <p>Pour plus de détails, vous pouvez suivre votre colis en cliquant sur le bouton ci-dessous :</p>
             <div style="text-align: center;">
-              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ohpieces.com'}/track/${numeroCommande}" style="display: inline-block; background-color: #254e9d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Suivre mon colis</a>
+              <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://logistique.ohgarage.com'}/track/${numeroCommande}" style="display: inline-block; background-color: #254e9d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;">Suivre mon colis</a>
             </div>
           </div>
           
@@ -163,7 +163,7 @@ export async function sendStatusUpdateEmail(colisData: ColisEmailData): Promise<
           </div>
           
           <div style="margin-top: 20px; text-align: center; border-top: 1px solid #e0e0e0; padding-top: 20px;">
-            <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://ohpieces.com'}/images/ohpieces.png" alt="Oh Pieces Logistique" style="max-width: 150px; height: auto; margin-bottom: 10px;">
+            <img src="${process.env.NEXT_PUBLIC_APP_URL || 'https://logistique.ohgarage.com'}/images/ohpieces.png" alt="Oh Pieces Logistique" style="max-width: 150px; height: auto; margin-bottom: 10px;">
             <div style="font-size: 12px; color: #666;">
               <p style="margin: 5px 0;"><a href="mailto:contact@ohpieces.com" style="color: #254e9d; text-decoration: none;">contact@ohpieces.com</a></p>
               <p style="margin: 5px 0;"><a href="tel:+221768669898" style="color: #254e9d; text-decoration: none;">+221 76 866 98 98</a></p>
