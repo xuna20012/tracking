@@ -3,10 +3,16 @@ import { getServerSession } from "next-auth/next";
 import { hash } from "bcryptjs";
 import prisma from "@/lib/prisma";
 
+interface RouteContext {
+  params: {
+    id: string;
+  };
+}
+
 // Récupérer un utilisateur spécifique
 export async function GET(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: RouteContext
 ) {
   try {
     const session = await getServerSession();
@@ -19,7 +25,7 @@ export async function GET(
       );
     }
 
-    const id = parseInt(context.params.id);
+    const id = parseInt(params.id);
     
     const user = await prisma.user.findUnique({
       where: { id },
@@ -55,7 +61,7 @@ export async function GET(
 // Mettre à jour un utilisateur
 export async function PUT(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: RouteContext
 ) {
   try {
     const session = await getServerSession();
@@ -68,7 +74,7 @@ export async function PUT(
       );
     }
 
-    const id = parseInt(context.params.id);
+    const id = parseInt(params.id);
     const { email, password, nom, prenom, role, actif } = await req.json();
 
     // Vérifier si l'utilisateur existe
@@ -126,7 +132,7 @@ export async function PUT(
 // Supprimer un utilisateur
 export async function DELETE(
   req: NextRequest,
-  context: { params: { id: string } }
+  { params }: RouteContext
 ) {
   try {
     const session = await getServerSession();
@@ -139,7 +145,7 @@ export async function DELETE(
       );
     }
 
-    const id = parseInt(context.params.id);
+    const id = parseInt(params.id);
 
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findUnique({
