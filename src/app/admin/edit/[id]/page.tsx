@@ -17,6 +17,7 @@ interface Colis {
   proprietaire_nom: string;
   proprietaire_email: string;
   proprietaire_telephone: string;
+  conseiller_technique_email?: string;
   statut_validated: boolean;
   statut_preparing: boolean;
   statut_departure: boolean;
@@ -102,16 +103,18 @@ export default function EditColisPage() {
     setSuccess(null);
 
     const formData = new FormData(e.currentTarget);
+    const dateCommande = formData.get('date_commande') as string;
     const data = {
       colis_nom: formData.get('colis_nom') as string,
       description: formData.get('description') as string,
-      date_commande: formData.get('date_commande') as string,
-      date_reception: formData.get('date_reception') as string,
+      date_commande: dateCommande,
+      date_reception: dateCommande,
       numero_commande: formData.get('numero_commande') as string,
       estimation_livraison: formData.get('estimation_livraison') as string,
       proprietaire_nom: formData.get('proprietaire_nom') as string,
       proprietaire_email: formData.get('proprietaire_email') as string,
       proprietaire_telephone: formData.get('proprietaire_telephone') as string,
+      conseiller_technique_email: formData.get('conseiller_technique_email') as string || undefined,
       statut_validated: formData.get('statut_validated') === 'on',
       statut_preparing: formData.get('statut_preparing') === 'on',
       statut_departure: formData.get('statut_departure') === 'on',
@@ -300,20 +303,6 @@ export default function EditColisPage() {
               </div>
 
               <div>
-                <label htmlFor="date_reception" className="block text-sm font-medium text-gray-700 mb-1">
-                  Date de réception *
-                </label>
-                <input
-                  type="date"
-                  id="date_reception"
-                  name="date_reception"
-                  defaultValue={formatDate(colis.date_reception)}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                />
-              </div>
-
-              <div>
                 <label htmlFor="estimation_livraison" className="block text-sm font-medium text-gray-700 mb-1">
                   Estimation de livraison *
                 </label>
@@ -370,15 +359,28 @@ export default function EditColisPage() {
               </div>
 
               <div>
+                <label htmlFor="conseiller_technique_email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Mail conseiller technique
+                </label>
+                <input
+                  type="email"
+                  id="conseiller_technique_email"
+                  name="conseiller_technique_email"
+                  defaultValue={colis.conseiller_technique_email || ''}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
+                />
+                <p className="text-xs text-gray-500 mt-1">Ce mail recevra également les notifications</p>
+              </div>
+
+              <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                  Description *
+                  Description
                 </label>
                 <textarea
                   id="description"
                   name="description"
                   rows={4}
                   defaultValue={colis.description}
-                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
                 ></textarea>
               </div>

@@ -21,12 +21,12 @@ export default function NewColisPage() {
     colis_nom: '',
     description: '',
     date_commande: formatDate(new Date()),
-    date_reception: formatDate(new Date()),
     numero_commande: '',
     estimation_livraison: formatDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)),
     proprietaire_nom: '',
     proprietaire_email: '',
     proprietaire_telephone: '',
+    conseiller_technique_email: '',
     statut_validated: false,
     statut_preparing: false,
     statut_departure: false,
@@ -85,7 +85,6 @@ export default function NewColisPage() {
   const validateForm = () => {
     // Validation basique des champs requis
     if (!formData.colis_nom.trim()) return "Le nom du colis est requis";
-    if (!formData.description.trim()) return "La description est requise";
     if (!formData.numero_commande.trim()) return "Le numéro de commande est requis";
     if (!formData.proprietaire_nom.trim()) return "Le nom du destinataire est requis";
     if (!formData.proprietaire_email.trim()) return "L'email du destinataire est requis";
@@ -97,12 +96,7 @@ export default function NewColisPage() {
     
     // Validation des dates
     try {
-      const dateCommande = new Date(formData.date_commande);
-      const dateReception = new Date(formData.date_reception);
-      
-      if (dateReception < dateCommande) {
-        return "La date de réception ne peut pas être antérieure à la date de commande";
-      }
+      // Remove date reception validation
     } catch (e) {
       return "Format de date invalide";
     }
@@ -129,7 +123,8 @@ export default function NewColisPage() {
         ...formData,
         // S'assurer que les dates sont au bon format (YYYY-MM-DD)
         date_commande: formData.date_commande,
-        date_reception: formData.date_reception,
+        // Utiliser la date de commande comme date de réception par défaut
+        date_reception: formData.date_commande,
         estimation_livraison: formData.estimation_livraison,
         // Convertir explicitement les booléens
         statut_validated: Boolean(formData.statut_validated),
@@ -275,21 +270,6 @@ export default function NewColisPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="date_reception" className="block text-sm font-medium text-gray-700 mb-1">
-                    Date de réception *
-                  </label>
-                  <input
-                    type="date"
-                    id="date_reception"
-                    name="date_reception"
-                    value={formData.date_reception}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
-                  />
-                </div>
-
-                <div>
                   <label htmlFor="estimation_livraison" className="block text-sm font-medium text-gray-700 mb-1">
                     Estimation de livraison *
                   </label>
@@ -353,6 +333,21 @@ export default function NewColisPage() {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
                   />
+                </div>
+                
+                <div>
+                  <label htmlFor="conseiller_technique_email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Mail conseiller technique
+                  </label>
+                  <input
+                    type="email"
+                    id="conseiller_technique_email"
+                    name="conseiller_technique_email"
+                    value={formData.conseiller_technique_email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Ce mail recevra également les notifications</p>
                 </div>
               </div>
             </div>
@@ -557,7 +552,7 @@ export default function NewColisPage() {
 
             <div className="mt-4">
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Description *
+                Description
               </label>
               <textarea
                 id="description"
@@ -565,7 +560,6 @@ export default function NewColisPage() {
                 value={formData.description}
                 onChange={handleChange}
                 rows={3}
-                required
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900"
               ></textarea>
             </div>

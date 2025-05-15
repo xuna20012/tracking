@@ -21,6 +21,7 @@ export interface ColisEmailData {
   numeroCommande: string;
   proprietaireNom: string;
   proprietaireEmail: string;
+  conseillerTechniqueEmail?: string; // Email facultatif du conseiller technique
   status: string;
   estimationLivraison?: string;
 }
@@ -28,14 +29,19 @@ export interface ColisEmailData {
 // Fonction pour envoyer un email de création de colis
 export async function sendNewPackageEmail(colisData: ColisEmailData): Promise<boolean> {
   try {
-    const { proprietaireNom, proprietaireEmail, colisNom, numeroCommande, estimationLivraison } = colisData;
+    const { proprietaireNom, proprietaireEmail, colisNom, numeroCommande, estimationLivraison, conseillerTechniqueEmail } = colisData;
     
     // Utiliser la même adresse que celle configurée dans le transporteur
     const smtpUser = process.env.SMTP_USER || 'noreply@ohpieces.com';
     
+    // Préparer les destinataires (client + conseiller technique si présent)
+    const recipients = conseillerTechniqueEmail 
+      ? `${proprietaireEmail}, ${conseillerTechniqueEmail}` 
+      : proprietaireEmail;
+    
     const mailOptions = {
       from: `"Oh Pieces Logistique" <${smtpUser}>`,
-      to: proprietaireEmail,
+      to: recipients,
       subject: `Votre colis ${numeroCommande} a été enregistré`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
@@ -89,10 +95,15 @@ export async function sendNewPackageEmail(colisData: ColisEmailData): Promise<bo
 // Fonction pour envoyer un email de mise à jour de statut
 export async function sendStatusUpdateEmail(colisData: ColisEmailData): Promise<boolean> {
   try {
-    const { proprietaireNom, proprietaireEmail, colisNom, numeroCommande, status } = colisData;
+    const { proprietaireNom, proprietaireEmail, colisNom, numeroCommande, status, conseillerTechniqueEmail } = colisData;
     
     // Utiliser la même adresse que celle configurée dans le transporteur
     const smtpUser = process.env.SMTP_USER || 'noreply@ohpieces.com';
+    
+    // Préparer les destinataires (client + conseiller technique si présent)
+    const recipients = conseillerTechniqueEmail 
+      ? `${proprietaireEmail}, ${conseillerTechniqueEmail}` 
+      : proprietaireEmail;
     
     // Personnalisation du message en fonction du statut
     let statusMessage = '';
@@ -130,7 +141,7 @@ export async function sendStatusUpdateEmail(colisData: ColisEmailData): Promise<
     
     const mailOptions = {
       from: `"Oh Pieces Logistique" <${smtpUser}>`,
-      to: proprietaireEmail,
+      to: recipients,
       subject: `Mise à jour de votre colis ${numeroCommande} - ${status}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">

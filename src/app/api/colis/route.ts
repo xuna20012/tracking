@@ -49,10 +49,6 @@ function validateColisData(data: any) {
     errors.push('La description du colis est requise');
   }
   
-  if (!data.description || !data.description.trim()) {
-    errors.push('La description est requise');
-  }
-  
   if (!data.proprietaire_nom || !data.proprietaire_nom.trim()) {
     errors.push('Le nom du destinataire est requis');
   }
@@ -77,21 +73,8 @@ function validateColisData(data: any) {
       errors.push('La date de commande est requise');
     }
     
-    if (!data.date_reception) {
-      errors.push('La date de réception est requise');
-    }
-    
     if (!data.estimation_livraison) {
       errors.push('La date d\'estimation de livraison est requise');
-    }
-    
-    if (data.date_commande && data.date_reception) {
-      const dateCommande = new Date(data.date_commande);
-      const dateReception = new Date(data.date_reception);
-      
-      if (dateReception < dateCommande) {
-        errors.push('La date de réception ne peut pas être antérieure à la date de commande');
-      }
     }
   } catch (e) {
     errors.push('Format de date invalide');
@@ -109,7 +92,7 @@ export async function GET(req: NextRequest) {
         // Récupérer tous les IDs de la table wp_tracking_colis
         const results = await tx.$queryRawUnsafe(`
           SELECT id, colis_nom, description, numero_commande, proprietaire_nom,
-          proprietaire_email, proprietaire_telephone,
+          proprietaire_email, proprietaire_telephone, conseiller_technique_email,
           statut_ordered, statut_validated, statut_preparing, statut_departure,
           statut_in_transit, statut_out_of_delivery, statut_delivered, statut_attente_douane,
           statut_en_cours_de_reparation, statut_reparation_terminee, 
@@ -199,6 +182,7 @@ export async function POST(req: NextRequest) {
         colis_nom, description, numero_commande, 
         date_commande, date_reception, estimation_livraison, date_ajout,
         proprietaire_nom, proprietaire_email, proprietaire_telephone,
+        conseiller_technique_email,
         statut_ordered, statut_validated, statut_preparing, statut_departure,
         statut_in_transit, statut_out_of_delivery, statut_delivered, statut_attente_douane,
         statut_en_cours_de_reparation, statut_reparation_terminee,
@@ -217,6 +201,7 @@ export async function POST(req: NextRequest) {
         '${data.proprietaire_nom.replace(/'/g, "''")}', 
         '${data.proprietaire_email}', 
         '${data.proprietaire_telephone}',
+        ${data.conseiller_technique_email ? `'${data.conseiller_technique_email}'` : 'NULL'},
         ${data.statut_ordered ? 1 : 0}, 
         ${data.statut_validated ? 1 : 0}, 
         ${data.statut_preparing ? 1 : 0}, 
@@ -273,6 +258,7 @@ export async function POST(req: NextRequest) {
         numeroCommande: data.numero_commande,
         proprietaireNom: data.proprietaire_nom,
         proprietaireEmail: data.proprietaire_email,
+        conseillerTechniqueEmail: data.conseiller_technique_email || undefined,
         status: 'Commandé',
         estimationLivraison: formattedEstimationDate
       };

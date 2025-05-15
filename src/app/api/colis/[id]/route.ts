@@ -15,24 +15,17 @@ const formatDateSafely = (date: any) => {
 };
 
 // GET a specific package by ID
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Extraire l'ID de l'URL
-    const pathname = req.nextUrl.pathname;
-    const idMatch = pathname.match(/\/api\/colis\/(\d+)/);
-    if (!idMatch) {
-      return NextResponse.json(
-        { error: "ID colis non valide" },
-        { status: 400 }
-      );
-    }
-    
-    const id = parseInt(idMatch[1]);
+    const id = parseInt(params.id);
     
     // Utiliser une requête SQL qui évite les problèmes de dates
     const result = await prisma.$queryRawUnsafe(`
       SELECT id, colis_nom, description, numero_commande, proprietaire_nom, 
-      proprietaire_email, proprietaire_telephone,
+      proprietaire_email, proprietaire_telephone, conseiller_technique_email,
       statut_ordered, statut_validated, statut_preparing, statut_departure,
       statut_in_transit, statut_out_of_delivery, statut_delivered, statut_attente_douane,
       statut_en_cours_de_reparation, statut_reparation_terminee, 
@@ -89,19 +82,12 @@ export async function GET(req: NextRequest) {
 }
 
 // PUT update a package
-export async function PUT(req: NextRequest) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Extraire l'ID de l'URL
-    const pathname = req.nextUrl.pathname;
-    const idMatch = pathname.match(/\/api\/colis\/(\d+)/);
-    if (!idMatch) {
-      return NextResponse.json(
-        { error: "ID colis non valide" },
-        { status: 400 }
-      );
-    }
-    
-    const id = parseInt(idMatch[1]);
+    const id = parseInt(params.id);
     const data = await req.json();
     
     // Récupérer l'état actuel du colis pour comparer les changements de statut
@@ -146,6 +132,13 @@ export async function PUT(req: NextRequest) {
     if (data.proprietaire_nom !== undefined) updateFields.push(`proprietaire_nom = '${data.proprietaire_nom.replace(/'/g, "''")}'`);
     if (data.proprietaire_email !== undefined) updateFields.push(`proprietaire_email = '${data.proprietaire_email}'`);
     if (data.proprietaire_telephone !== undefined) updateFields.push(`proprietaire_telephone = '${data.proprietaire_telephone}'`);
+    if (data.conseiller_technique_email !== undefined) {
+      if (data.conseiller_technique_email) {
+        updateFields.push(`conseiller_technique_email = '${data.conseiller_technique_email}'`);
+      } else {
+        updateFields.push(`conseiller_technique_email = NULL`);
+      }
+    }
     
     // Ajout des champs date
     if (date_commande) updateFields.push(`date_commande = '${date_commande}'`);
@@ -270,6 +263,7 @@ export async function PUT(req: NextRequest) {
           numeroCommande: updatedColis.numero_commande,
           proprietaireNom: updatedColis.proprietaire_nom,
           proprietaireEmail: updatedColis.proprietaire_email,
+          conseillerTechniqueEmail: updatedColisData.conseiller_technique_email || undefined,
           status: newStatus
         };
         
@@ -291,19 +285,12 @@ export async function PUT(req: NextRequest) {
 }
 
 // DELETE a package
-export async function DELETE(req: NextRequest) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Extraire l'ID de l'URL
-    const pathname = req.nextUrl.pathname;
-    const idMatch = pathname.match(/\/api\/colis\/(\d+)/);
-    if (!idMatch) {
-      return NextResponse.json(
-        { error: "ID colis non valide" },
-        { status: 400 }
-      );
-    }
-    
-    const id = parseInt(idMatch[1]);
+    const id = parseInt(params.id);
     
     // Utiliser SQL brut pour la suppression
     await prisma.$executeRawUnsafe(`
