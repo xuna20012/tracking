@@ -11,7 +11,7 @@ interface Colis {
   colis_nom: string;
   description: string;
   date_commande: string;
-  date_reception: string;
+  date_reception?: string;
   numero_commande: string;
   estimation_livraison: string;
   proprietaire_nom: string;
@@ -108,7 +108,7 @@ export default function EditColisPage() {
       colis_nom: formData.get('colis_nom') as string,
       description: formData.get('description') as string,
       date_commande: dateCommande,
-      date_reception: dateCommande,
+      // date_reception field is no longer needed, it will be set to date_commande on the server
       numero_commande: formData.get('numero_commande') as string,
       estimation_livraison: formData.get('estimation_livraison') as string,
       proprietaire_nom: formData.get('proprietaire_nom') as string,

@@ -4,7 +4,10 @@ import { hash } from "bcryptjs";
 import prisma from "@/lib/prisma";
 
 // Récupérer un utilisateur spécifique
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession();
     
@@ -16,17 +19,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Extraire l'ID de l'URL
-    const pathname = req.nextUrl.pathname;
-    const idMatch = pathname.match(/\/api\/admin\/users\/(\d+)/);
-    if (!idMatch) {
-      return NextResponse.json(
-        { error: "ID utilisateur non valide" },
-        { status: 400 }
-      );
-    }
-    
-    const id = parseInt(idMatch[1]);
+    const id = parseInt(params.id);
     
     const user = await prisma.user.findUnique({
       where: { id },
@@ -60,7 +53,10 @@ export async function GET(req: NextRequest) {
 }
 
 // Mettre à jour un utilisateur
-export async function PUT(req: NextRequest) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession();
     
@@ -72,17 +68,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Extraire l'ID de l'URL
-    const pathname = req.nextUrl.pathname;
-    const idMatch = pathname.match(/\/api\/admin\/users\/(\d+)/);
-    if (!idMatch) {
-      return NextResponse.json(
-        { error: "ID utilisateur non valide" },
-        { status: 400 }
-      );
-    }
-    
-    const id = parseInt(idMatch[1]);
+    const id = parseInt(params.id);
     const { email, password, nom, prenom, role, actif } = await req.json();
 
     // Vérifier si l'utilisateur existe
@@ -138,7 +124,10 @@ export async function PUT(req: NextRequest) {
 }
 
 // Supprimer un utilisateur
-export async function DELETE(req: NextRequest) {
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession();
     
@@ -150,17 +139,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    // Extraire l'ID de l'URL
-    const pathname = req.nextUrl.pathname;
-    const idMatch = pathname.match(/\/api\/admin\/users\/(\d+)/);
-    if (!idMatch) {
-      return NextResponse.json(
-        { error: "ID utilisateur non valide" },
-        { status: 400 }
-      );
-    }
-    
-    const id = parseInt(idMatch[1]);
+    const id = parseInt(params.id);
 
     // Vérifier si l'utilisateur existe
     const existingUser = await prisma.user.findUnique({

@@ -33,7 +33,8 @@ export async function GET(
       description_attente_douane, description_delivered, 
       description_en_cours_de_reparation, description_reparation_terminee,
       prise_rendez_vous_active, details_supplementaires_visible,
-      details_supplementaires, etapes_suivi, rendez_vous_statut
+      details_supplementaires, etapes_suivi, rendez_vous_statut,
+      date_commande, date_ajout, estimation_livraison, rendez_vous_date
       FROM wp_tracking_colis 
       WHERE id = ${id}
     `);
@@ -46,18 +47,15 @@ export async function GET(
     // Obtenir le premier élément du résultat (il devrait n'y en avoir qu'un)
     const colisData = Array.isArray(result) ? result[0] : result;
     
-    // Utilisez des dates par défaut pour éviter les erreurs
-    const now = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
-    
-    // Formater correctement les dates et booléens
+    // Formatage des dates avec des valeurs actuelles si disponibles
     const colis = {
       ...colisData,
-      // Utiliser des dates par défaut
-      date_commande: now,
-      date_reception: now,
-      date_ajout: now,
-      estimation_livraison: now,
-      rendez_vous_date: null,
+      // Utiliser des dates à partir de la base de données ou par défaut si nécessaire
+      date_commande: colisData.date_commande ? new Date(colisData.date_commande).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date_reception: colisData.date_commande ? new Date(colisData.date_commande).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date_ajout: colisData.date_ajout ? new Date(colisData.date_ajout).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      estimation_livraison: colisData.estimation_livraison ? new Date(colisData.estimation_livraison).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      rendez_vous_date: colisData.rendez_vous_date ? new Date(colisData.rendez_vous_date).toISOString().split('T')[0] : null,
       
       // S'assurer que les booléens sont correctement typés
       statut_ordered: Boolean(colisData.statut_ordered),
@@ -118,7 +116,6 @@ export async function PUT(
     
     // Convertir les dates en format SQL valide
     const date_commande = data.date_commande ? new Date(data.date_commande).toISOString().split('T')[0] : null;
-    const date_reception = data.date_reception ? new Date(data.date_reception).toISOString().split('T')[0] : null;
     const estimation_livraison = data.estimation_livraison ? new Date(data.estimation_livraison).toISOString().split('T')[0] : null;
     const rendez_vous_date = data.rendez_vous_date ? new Date(data.rendez_vous_date).toISOString().split('T')[0] : null;
     
@@ -141,8 +138,10 @@ export async function PUT(
     }
     
     // Ajout des champs date
-    if (date_commande) updateFields.push(`date_commande = '${date_commande}'`);
-    if (date_reception) updateFields.push(`date_reception = '${date_reception}'`);
+    if (date_commande) {
+      updateFields.push(`date_commande = '${date_commande}'`);
+      updateFields.push(`date_reception = '${date_commande}'`); // Utiliser la même date pour date_reception
+    }
     if (estimation_livraison) updateFields.push(`estimation_livraison = '${estimation_livraison}'`);
     if (rendez_vous_date) {
       updateFields.push(`rendez_vous_date = '${rendez_vous_date}'`);
@@ -218,14 +217,13 @@ export async function PUT(
     }
     
     // Formater les dates pour la réponse
-    const now = new Date().toISOString().split('T')[0];
     const updatedColis = {
       ...updatedColisData,
-      date_commande: now,
-      date_reception: now,
-      date_ajout: now,
-      estimation_livraison: now,
-      rendez_vous_date: null,
+      date_commande: updatedColisData.date_commande ? new Date(updatedColisData.date_commande).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date_reception: updatedColisData.date_commande ? new Date(updatedColisData.date_commande).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      date_ajout: updatedColisData.date_ajout ? new Date(updatedColisData.date_ajout).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      estimation_livraison: updatedColisData.estimation_livraison ? new Date(updatedColisData.estimation_livraison).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      rendez_vous_date: updatedColisData.rendez_vous_date ? new Date(updatedColisData.rendez_vous_date).toISOString().split('T')[0] : null,
       
       // S'assurer que les booléens sont correctement typés
       statut_ordered: Boolean(updatedColisData.statut_ordered),

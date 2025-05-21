@@ -89,7 +89,7 @@ export async function GET(req: NextRequest) {
     // Utiliser une requête SQL directe sans Prisma pour éviter les problèmes de dates
     const formattedColis = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       try {
-        // Récupérer tous les IDs de la table wp_tracking_colis
+        // Récupérer les données avec les dates formatées directement par MySQL
         const results = await tx.$queryRawUnsafe(`
           SELECT id, colis_nom, description, numero_commande, proprietaire_nom,
           proprietaire_email, proprietaire_telephone, conseiller_technique_email,
@@ -100,37 +100,42 @@ export async function GET(req: NextRequest) {
           description_attente_douane, description_delivered, 
           description_en_cours_de_reparation, description_reparation_terminee,
           prise_rendez_vous_active, details_supplementaires_visible,
-          details_supplementaires, etapes_suivi, rendez_vous_statut
+          details_supplementaires, etapes_suivi, rendez_vous_statut,
+          IF(date_commande = '0000-00-00', NULL, DATE_FORMAT(date_commande, '%Y-%m-%d')) as formatted_date_commande,
+          IF(estimation_livraison = '0000-00-00', NULL, DATE_FORMAT(estimation_livraison, '%Y-%m-%d')) as formatted_estimation_livraison,
+          IF(date_ajout = '0000-00-00', NULL, DATE_FORMAT(date_ajout, '%Y-%m-%d')) as formatted_date_ajout
           FROM wp_tracking_colis 
           ORDER BY id DESC
         `);
         
-        // Pour chaque ID, créer un objet Colis avec des valeurs de date valides
-        const now = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD
+        // Convertir les résultats
+        const now = new Date().toISOString().split('T')[0]; // Format YYYY-MM-DD pour date par défaut
         
-        return Array.isArray(results) ? results.map(colis => ({
-          ...colis,
-          // Utiliser des dates par défaut pour éviter les erreurs
-          date_commande: now,
-          date_reception: now,
-          date_ajout: now,
-          estimation_livraison: now,
-          rendez_vous_date: null,
-          
-          // Assurez-vous que les booléens sont correctement typés
-          statut_ordered: Boolean(colis.statut_ordered),
-          statut_validated: Boolean(colis.statut_validated),
-          statut_preparing: Boolean(colis.statut_preparing),
-          statut_departure: Boolean(colis.statut_departure),
-          statut_in_transit: Boolean(colis.statut_in_transit),
-          statut_out_of_delivery: Boolean(colis.statut_out_of_delivery),
-          statut_delivered: Boolean(colis.statut_delivered),
-          statut_attente_douane: Boolean(colis.statut_attente_douane),
-          statut_en_cours_de_reparation: Boolean(colis.statut_en_cours_de_reparation),
-          statut_reparation_terminee: Boolean(colis.statut_reparation_terminee),
-          prise_rendez_vous_active: Boolean(colis.prise_rendez_vous_active),
-          details_supplementaires_visible: Boolean(colis.details_supplementaires_visible),
-        })) : [];
+        return Array.isArray(results) ? results.map(colis => {
+          return {
+            ...colis,
+            // Utiliser les dates formatées par MySQL ou des dates par défaut
+            date_commande: colis.formatted_date_commande || now,
+            date_reception: colis.formatted_date_commande || now, // Utiliser date_commande pour date_reception
+            date_ajout: colis.formatted_date_ajout || now,
+            estimation_livraison: colis.formatted_estimation_livraison || now,
+            rendez_vous_date: null,
+            
+            // Assurez-vous que les booléens sont correctement typés
+            statut_ordered: Boolean(colis.statut_ordered),
+            statut_validated: Boolean(colis.statut_validated),
+            statut_preparing: Boolean(colis.statut_preparing),
+            statut_departure: Boolean(colis.statut_departure),
+            statut_in_transit: Boolean(colis.statut_in_transit),
+            statut_out_of_delivery: Boolean(colis.statut_out_of_delivery),
+            statut_delivered: Boolean(colis.statut_delivered),
+            statut_attente_douane: Boolean(colis.statut_attente_douane),
+            statut_en_cours_de_reparation: Boolean(colis.statut_en_cours_de_reparation),
+            statut_reparation_terminee: Boolean(colis.statut_reparation_terminee),
+            prise_rendez_vous_active: Boolean(colis.prise_rendez_vous_active),
+            details_supplementaires_visible: Boolean(colis.details_supplementaires_visible),
+          };
+        }) : [];
       } catch (error) {
         console.error("Erreur lors de la requête SQL:", error);
         return [];

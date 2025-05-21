@@ -124,12 +124,24 @@ export default function ColisPage() {
   // Formater les dates
   const formatDate = (dateString: string) => {
     if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).format(date);
+    try {
+      // Vérifier les dates invalides
+      if (dateString.includes('0000-00-00')) return 'N/A';
+      
+      const date = new Date(dateString);
+      
+      // Vérifier si la date est valide
+      if (isNaN(date.getTime())) return 'N/A';
+      
+      return new Intl.DateTimeFormat('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }).format(date);
+    } catch (e) {
+      console.error('Erreur lors du formatage de la date:', e);
+      return 'N/A';
+    }
   };
 
   // Déterminer le statut actuel d'un colis
