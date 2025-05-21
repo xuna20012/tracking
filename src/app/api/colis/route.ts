@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
 import { sendNewPackageEmail, ColisEmailData } from '@/lib/email';
+import { sendStatusSMS } from '@/lib/sms';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -272,6 +273,20 @@ export async function POST(req: NextRequest) {
     } catch (emailError) {
       console.error('Erreur lors de l\'envoi de l\'email:', emailError);
       // On continue même si l'envoi d'email échoue
+    }
+    
+    // Envoyer un SMS de confirmation au client
+    try {
+      await sendStatusSMS(
+        data.proprietaire_telephone,
+        data.proprietaire_nom,
+        data.numero_commande,
+        'Commandé'
+      );
+      console.log(`SMS de confirmation envoyé à ${data.proprietaire_telephone}`);
+    } catch (smsError) {
+      console.error('Erreur lors de l\'envoi de l\'SMS:', smsError);
+      // On continue même si l'envoi d'SMS échoue
     }
     
     return NextResponse.json(newColis, { status: 201 });

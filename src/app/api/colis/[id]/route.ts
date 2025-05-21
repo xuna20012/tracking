@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { sendStatusUpdateEmail, ColisEmailData } from '@/lib/email';
+import { sendStatusSMS } from '@/lib/sms';
 
 // Fonction pour formatter de façon sécurisée les dates
 const formatDateSafely = (date: any) => {
@@ -265,7 +266,24 @@ export async function PUT(
           status: newStatus
         };
         
+        // Envoyer l'email de notification
         await sendStatusUpdateEmail(emailData);
+        
+        // Envoyer également un SMS si un numéro de téléphone est disponible
+        if (updatedColis.proprietaire_telephone) {
+          try {
+            await sendStatusSMS(
+              updatedColis.proprietaire_telephone,
+              updatedColis.proprietaire_nom,
+              updatedColis.numero_commande,
+              newStatus
+            );
+            console.log(`SMS de notification envoyé à ${updatedColis.proprietaire_telephone}`);
+          } catch (smsError) {
+            console.error('Erreur lors de l\'envoi du SMS de mise à jour de statut:', smsError);
+            // Continuer même si l'envoi de SMS échoue
+          }
+        }
       } catch (emailError) {
         console.error('Erreur lors de l\'envoi de l\'email de mise à jour de statut:', emailError);
         // On continue même si l'envoi d'email échoue
