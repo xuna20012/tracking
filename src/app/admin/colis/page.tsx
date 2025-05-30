@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import DashboardLayout from '@/components/DashboardLayout';
+import ConsultationModal from '@/components/ConsultationModal';
 import Swal from 'sweetalert2';
 import { 
   MagnifyingGlassIcon, 
@@ -36,9 +37,15 @@ interface Colis {
   statut_reparation_terminee: boolean;
 }
 
+interface ConsultationCount {
+  numero_commande: string;
+  consultation_count: number;
+}
+
 export default function ColisPage() {
   const [colis, setColis] = useState<Colis[]>([]);
   const [filteredColis, setFilteredColis] = useState<Colis[]>([]);
+  const [consultations, setConsultations] = useState<ConsultationCount[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,21 +54,39 @@ export default function ColisPage() {
   const [statusFilter, setStatusFilter] = useState('tous');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [deleteStatus, setDeleteStatus] = useState<{success: boolean; message: string} | null>(null);
+  const [consultationModal, setConsultationModal] = useState<{
+    isOpen: boolean;
+    numeroCommande: string;
+    colisNom: string;
+  }>({
+    isOpen: false,
+    numeroCommande: '',
+    colisNom: ''
+  });
   
   // Fonction pour récupérer les colis
   useEffect(() => {
     const fetchColis = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/colis');
+        const [colisResponse, consultationsResponse] = await Promise.all([
+          fetch('/api/colis'),
+          fetch('/api/colis/consultations')
+        ]);
         
-        if (!response.ok) {
+        if (!colisResponse.ok) {
           throw new Error('Une erreur est survenue lors de la récupération des colis');
         }
         
-        const data = await response.json();
-        setColis(data);
-        setFilteredColis(data);
+        const colisData = await colisResponse.json();
+        setColis(colisData);
+        setFilteredColis(colisData);
+
+        // Récupérer les consultations (ignore les erreurs si la table n'existe pas encore)
+        if (consultationsResponse.ok) {
+          const consultationsData = await consultationsResponse.json();
+          setConsultations(consultationsData);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       } finally {
@@ -233,6 +258,30 @@ export default function ColisPage() {
     }
   };
 
+  // Fonction pour obtenir le nombre de consultations d'un colis
+  const getConsultationCount = (numeroCommande: string): number => {
+    const consultation = consultations.find(c => c.numero_commande === numeroCommande);
+    return consultation ? consultation.consultation_count : 0;
+  };
+
+  // Fonction pour ouvrir le modal de consultation
+  const openConsultationModal = (numeroCommande: string, colisNom: string) => {
+    setConsultationModal({
+      isOpen: true,
+      numeroCommande,
+      colisNom
+    });
+  };
+
+  // Fonction pour fermer le modal de consultation
+  const closeConsultationModal = () => {
+    setConsultationModal({
+      isOpen: false,
+      numeroCommande: '',
+      colisNom: ''
+    });
+  };
+
   if (loading && colis.length === 0) {
     return (
       <DashboardLayout>
@@ -400,6 +449,9 @@ export default function ColisPage() {
                 <th scope="col" className="w-24 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Statut
                 </th>
+                <th scope="col" className="w-28 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Consultations
+                </th>
                 <th scope="col" className="w-36 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -408,13 +460,14 @@ export default function ColisPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {currentItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
                     Aucun colis trouvé
                   </td>
                 </tr>
               ) : (
                 currentItems.map((item) => {
                   const status = getColisStatus(item);
+                  const consultationCount = getConsultationCount(item.numero_commande);
                   return (
                     <tr key={item.id} className="hover:bg-gray-50">
                       <td className="px-3 py-4 text-sm font-medium text-gray-900 truncate max-w-[12rem]">
@@ -433,6 +486,21 @@ export default function ColisPage() {
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${status.color}`}>
                           {status.label}
                         </span>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => openConsultationModal(item.numero_commande, item.colis_nom)}
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors hover:bg-opacity-80 ${
+                              consultationCount > 0 
+                                ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' 
+                                : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                            }`}
+                            title="Voir les détails des consultations"
+                          >
+                            {consultationCount} vue{consultationCount > 1 ? 's' : ''}
+                          </button>
+                        </div>
                       </td>
                       <td className="px-3 py-4 whitespace-nowrap text-sm font-medium">
                         <Link 
@@ -534,6 +602,14 @@ export default function ColisPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de consultation */}
+      <ConsultationModal
+        isOpen={consultationModal.isOpen}
+        onClose={closeConsultationModal}
+        numeroCommande={consultationModal.numeroCommande}
+        colisNom={consultationModal.colisNom}
+      />
     </DashboardLayout>
   );
 } 

@@ -9,7 +9,8 @@ import {
   UsersIcon, 
   ChartBarIcon, 
   CogIcon, 
-  BellIcon 
+  BellIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 
 interface SidebarItemProps {
@@ -63,6 +64,13 @@ export default function Sidebar() {
           icon={<ChartBarIcon />} 
           text="Statistiques" 
           active={pathname === '/admin/statistiques'} 
+        />
+        
+        <SidebarItem 
+          href="/admin/consultations" 
+          icon={<EyeIcon />} 
+          text="Consultations" 
+          active={pathname === '/admin/consultations'} 
         />
         
         {isAdmin && (

@@ -109,3 +109,20 @@ model WpColis {
 
   @@map("wp_tracking_colis")
 }
+
+// Modèle pour l'historique des consultations des colis
+model ConsultationHistory {
+  id            Int      @id @default(autoincrement())
+  numero_commande String   @db.VarChar(20)
+  ip_address    String?  @db.VarChar(45)  // Support IPv4 et IPv6
+  user_agent    String?  @db.Text
+  consultation_date DateTime @default(now())
+  // Informations optionnelles du client
+  client_email  String?  @db.VarChar(255)
+  client_nom    String?  @db.VarChar(255)
+  
+  // Index pour optimiser les requêtes
+  @@index([numero_commande])
+  @@index([consultation_date])
+  @@map("consultation_history")
+}

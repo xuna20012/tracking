@@ -73,7 +73,27 @@ export default function TrackingPage() {
   const brandBlue = '#254e9d';
   const brandOrange = '#fd7e14';
 
+  // Fonction pour nettoyer les anciennes entrées de consultation du localStorage
+  const cleanOldConsultations = () => {
+    const now = Date.now();
+    const oneDayAgo = now - (24 * 60 * 60 * 1000); // 24 heures en millisecondes
+    
+    // Parcourir toutes les clés du localStorage
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('consultation_')) {
+        const timestamp = localStorage.getItem(key);
+        if (timestamp && parseInt(timestamp) < oneDayAgo) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
+    // Nettoyer les anciennes consultations au chargement
+    cleanOldConsultations();
+    
     const fetchColis = async () => {
       try {
         const response = await fetch(`/api/track/${numero}`);
@@ -87,6 +107,36 @@ export default function TrackingPage() {
         
         const data = await response.json();
         setColis(data);
+        
+        // Enregistrer la consultation (avec protection contre les doublons)
+        // Vérifier si on a déjà enregistré cette consultation récemment
+        const lastConsultationKey = `consultation_${numero}`;
+        const lastConsultationTime = localStorage.getItem(lastConsultationKey);
+        const now = Date.now();
+        const fiveMinutesAgo = now - (5 * 60 * 1000); // 5 minutes en millisecondes
+        
+        // N'enregistrer que si aucune consultation n'a été faite dans les 5 dernières minutes
+        if (!lastConsultationTime || parseInt(lastConsultationTime) < fiveMinutesAgo) {
+          try {
+            await fetch('/api/consultation-history', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                numero_commande: numero,
+                client_email: data.proprietaire_email,
+                client_nom: data.proprietaire_nom
+              })
+            });
+            
+            // Marquer cette consultation comme enregistrée
+            localStorage.setItem(lastConsultationKey, now.toString());
+          } catch (consultationError) {
+            // Ignorer les erreurs de consultation pour ne pas affecter l'expérience utilisateur
+            console.warn('Impossible d\'enregistrer la consultation:', consultationError);
+          }
+        }
         
         // Calculer le statut actuel et les étapes
         processTrackingData(data);
